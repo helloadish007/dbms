@@ -1,0 +1,213 @@
+create table branch(b_id serial primary key,
+			bname varchar(10),
+			city varchar(10));
+===============================================================
+create table customer(c_id serial primary key,
+			cname varchar(10),
+			city varchar(10));
+===============================================================
+create table deposit( acc_no int ,
+			c_id int references customer(c_id),
+			b_id int references branch(b_id),
+			amount int,
+			date_d date);
+
+
+
+
+create table borrow( loan_no int ,
+			c_id int references customer(c_id),
+			b_id int references branch(b_id),
+			amount int,
+			date_b date);
+
+
+
+++++==================++++++++++++++=====
+
+insert into branch(bname,city)
+values('SBI','trivandrum'),
+	('ICICI','trivandrum'),
+	('HDFC','chennai');
+
+=========================================================
+ 
+insert into customer(cname,city)
+values('Ansaf','trivandrum'),
+      ('Abhijith','trivandrum'),
+      ('Bimal','chennai');
+
+===================================================
+insert into deposit(acc_no,amount,date_d)
+values(1000,4000000,'2012-04-12'),
+      (1010,9000000,'2012-05-14'),                (4000,2200000,'2016-10-12');
+
+
+=================================================
+insert into deposit(acc_no,c_id,b_id,amount,date_d)
+values(1000,1,1,4000000,'2012-04-12'),
+      (1010,2,2,9000000,'2012-05-14'),                (4000,3,3,2200000,'2016-10-12');
+
+insert into borrow(c_id,b_id)
+values(1,1),
+      (2,2),(3,3);
+
+insert into borrow(loan_no,c_id,b_id,amount,date_b)
+values(2344,1,2,0,'2013-02-17'),
+(2345,1,2,1200,'2013-02-17');
+(1234,1,1,0,null),
+	(1111,2,2,1400000,'2013-03-17'),
+	(2222,3,3,500000,'2015-09-19');
+++++++++++++++++++++++++++++++++++++++++++++++
+update deposit
+set c_id=1,b_id=1
+where acc_no=1000;
+
+BANK DATABASE
+branch(b_id, bname, city)
+customer(c_id, cname, city)
+deposit(acc_no, c_id, b_id, amount, date)
+borrow(loan_no, c_id, b_id, amount, date)
+*/
+
+-- 1) Find the number of customers who have loan in each branch
+
+-- 2)List all details of all customers
+
+
+2
+3
+4
+5
+6
+7
+SELECT
+ b_id,
+ COUNT (c_id)
+FROM
+ borrow
+where
+amount>0
+GROUP BY
+ b_id;
+
+
+SELECT concat(b_id, ,c_id) as branch  FROM borrow
+    WHERE c_id is not null;
+select count(c_id),b_id from borrow where amount>=0;
+
+===================================================
+function
+borrow(loan_no, c_id, b_id, amount, date)
+  create or replace function loan2() returns table(ci_id int, bi_id bigint) as
+   $$
+   begin
+	return query 
+	SELECT
+	 b_id,
+	 COUNT (c_id)
+	FROM
+	 borrow
+	where
+	amount>0
+	GROUP BY
+	 b_id;
+       
+   end;
+   $$
+   language plpgsql;
+-----------------------------------------------------------------
+ create or replace function cust() returns table(c1_id int,cname1 varchar,city1 varchar) as
+   $$
+   begin
+	return query 
+	select * from customer;
+       
+   end;
+   $$
+   language plpgsql;
+
+----------------------------------------------------------------------
+EMPLOYEE DATABASE
+employee(emp_id, name, dob, doj, sal, dept_id)
+department(dept_id, dept_name)
+*/
+
+-- 1)Write a function for updating the salary of employees working in the department with dept_id=10 by 20%
+
+-- 2)Write a function for employee table which accepts dept_id and return the highest salary in that department. Handle the error if the dept_id does not exist or if the query return more than one maximum
+
+-- 3)Write a function which accepts emp_id and returns employee experience
+create table employee( emp_id serial not null,
+			name varchar(20) not null,
+			dob date,
+			doj date,
+			sal numeric,
+			dept_id serial);
+create table department( dept_id serial not null primary key,
+			 dept_name varchar(20) not null );
+insert into employee(name,dob,doj,sal)
+values('a','2013-03-17','2013-03-18',1000),
+('b','2013-03-18','2013-03-19',2000),
+('c','2013-03-19','2013-03-20',3000),
+('d','2013-03-20','2013-03-21',4000),
+('e','2013-03-21','2013-03-22',5000),
+('f','2013-03-22','2013-03-23',6000),
+('g','2013-03-23','2013-03-24',7000),
+('h','2013-03-26','2013-03-25',8000),
+('i','2013-03-27','2013-03-28',9000),
+('j','2013-03-7','2013-03-18',10000);
+ALTER TABLE employee
+ALTER COLUMN sal TYPE numeric;
+insert into department(dept_name)
+values('d1'),
+('d2'),
+('d3'),
+('d4'),
+('d5'),
+('d7'),
+('d8'),
+('d9'),
+('d10');
+employee(emp_id, name, dob, doj, sal, dept_id)
+department(dept_id, dept_name)
+Write a function for updating the salary of employees working in the department with dept_id=10 by 20%
+select sal+(sal*0.02) as sal from employee where dept_id=10; 
+UPDATE employee
+SET sal=sal+(sal*0.02)
+WHERE
+dept_id=10; 
+ create or replace function up2() returns table(sal1 numeric) as
+   $$
+   begin
+	return query 
+	select sal+(sal*0.02) as sal from employee where dept_id=10;
+	UPDATE employee
+	SET sal=sal+(sal*0.02)
+	WHERE
+	dept_id=10;
+   end;
+   $$
+   language plpgsql;
+------------------------------------------------------------------
+ create or replace function up3() returns table(sal1 numeric) as
+   $$
+   begin
+	return query 
+	UPDATE employee
+	SET sal=sal+(sal*0.02)
+	WHERE
+	dept_id=10;
+   end;
+   $$
+   language plpgsql;
+---------------------------------------------------------------------
+ 2)Write a function for employee table which accepts dept_id and return the highest salary in that department. Handle the error if the dept_id does not exist or if the query return more than one maximum?
+
+
+
+employee(emp_id, name, dob, doj, sal, dept_id)
+department(dept_id, dept_name)
+
+select max(sal) from employee where 
+
